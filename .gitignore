@@ -1,5 +1,7 @@
 *.
 !.gitignore
+*.pem
 build
 node_modules
+public
 configuration.js

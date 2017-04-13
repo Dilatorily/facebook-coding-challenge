@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import winston from 'winston'; // eslint-disable-line import/no-extraneous-dependencies
 import express from 'express'; // eslint-disable-line import/no-extraneous-dependencies
 import compression from 'compression'; // eslint-disable-line import/no-extraneous-dependencies
@@ -38,5 +39,8 @@ secureApp.use(bodyParser.json());
 
 facebook(secureApp);
 secureApp.use(express.static('public', { maxAge: cacheMaxAge }));
+secureApp.get('*', (request, response) => {
+  response.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 httpsApp.listen(httpsPort, listen(httpsPort));

@@ -19,6 +19,6 @@ const app = express();
 app.use(bodyParser.json());
 
 facebook(app);
-app.use('/', proxy({ target: 'http://localhost:3001', changeOrigin: true }));
+app.use(proxy({ target: 'http://localhost:3001', changeOrigin: true }));
 
 app.listen(configuration.port, listen(configuration.port));
