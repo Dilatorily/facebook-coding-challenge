@@ -80,10 +80,12 @@ class AddPost extends React.Component {
   state = { post: '' }
 
   handleSubmit = isPublished => () => {
-    post('/api/posts', { post: this.state.post, isPublished }).then(() => {
-      this.setState({ post: '' });
-      this.props.onSubmit();
-    });
+    if (this.state.post.trim()) {
+      post('/api/posts', { post: this.state.post.trim(), isPublished }).then(() => {
+        this.setState({ post: '' });
+        this.props.onSubmit();
+      });
+    }
   }
 
   handleChange = (event) => {
