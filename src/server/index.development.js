@@ -1,5 +1,6 @@
 import winston from 'winston'; // eslint-disable-line import/no-extraneous-dependencies
 import express from 'express'; // eslint-disable-line import/no-extraneous-dependencies
+import bodyParser from 'body-parser'; // eslint-disable-line import/no-extraneous-dependencies
 import proxy from 'http-proxy-middleware'; // eslint-disable-line import/no-extraneous-dependencies
 
 import facebook from './facebook';
@@ -15,6 +16,7 @@ const listen = portToListen => (error) => {
 };
 
 const app = express();
+app.use(bodyParser.json());
 
 facebook(app);
 app.use('/', proxy({ target: 'http://localhost:3001', changeOrigin: true }));

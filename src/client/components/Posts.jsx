@@ -1,5 +1,6 @@
 import React from 'react';
 
+import AddPost from './AddPost';
 import Post from './Post';
 import { get } from '../utils';
 
@@ -26,20 +27,29 @@ class Posts extends React.Component {
     });
   }
 
+  handleSubmit = () => {
+    get('/api/posts').then((posts) => {
+      this.setState({ ...this.state, posts });
+    });
+  }
+
   render() {
     return (
-      <ul style={styles.list}>
-        {
-          this.state.posts
-            .filter(post => post.message)
-            .sort((a, b) => {
-              if (b.created_time < a.created_time) return -1;
-              if (b.created_time > a.created_time) return 1;
-              return 0;
-            })
-            .map(post => <Post key={post.id} post={post} picture={this.state.picture} />)
-        }
-      </ul>
+      <div>
+        <AddPost onSubmit={this.handleSubmit} />
+        <ul style={styles.list}>
+          {
+            this.state.posts
+              .filter(post => post.message)
+              .sort((a, b) => {
+                if (b.created_time < a.created_time) return -1;
+                if (b.created_time > a.created_time) return 1;
+                return 0;
+              })
+              .map(post => <Post key={post.id} post={post} picture={this.state.picture} />)
+          }
+        </ul>
+      </div>
     );
   }
 }

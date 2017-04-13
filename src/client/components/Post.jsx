@@ -1,4 +1,5 @@
 import React from 'react';
+import Radium from 'radium';
 import PropTypes from 'prop-types';
 import format from 'date-fns/format';
 
@@ -19,10 +20,13 @@ const styles = {
     display: 'flex',
     marginBottom: 11,
   },
+  pictureLink: {
+    height: 40,
+    marginRight: 8,
+  },
   picture: {
     width: 40,
     height: 40,
-    marginRight: 8,
   },
   post: {
     margin: '2px 0 3px',
@@ -33,6 +37,10 @@ const styles = {
   published: {
     color: '#365899',
     fontWeight: 600,
+    textDecoration: 'none',
+    ':hover': {
+      textDecoration: 'underline',
+    },
   },
   time: {
     margin: 0,
@@ -60,13 +68,18 @@ class Post extends React.Component {
     const { picture, post } = this.props;
 
     const content = { __html: post.message.replace(/\n/g, '<br />') };
+    const ids = post.id.split('_');
     return (
       <li style={styles.container}>
         <div style={styles.header}>
-          <img style={styles.picture} src={picture} alt="Dilatorily Profile" />
+          <a style={styles.pictureLink} href="https://www.facebook.com/Dilatorily-515870255467883">
+            <img style={styles.picture} src={picture} alt="Dilatorily Profile" />
+          </a>
           <div>
             <h5 style={styles.post}>
-              <span style={styles.published}>{post.is_published ? 'Published' : 'Unpublished'} Post</span> viewed by {this.state.views} {pluralize('user', this.state.views)}.
+              <a style={styles.published} href={`https://www.facebook.com/permalink.php?story_fbid=${ids[1]}&id=${ids[0]}`}>
+                {post.is_published ? 'Published' : 'Unpublished'} Post
+              </a> viewed by {this.state.views} {pluralize('person', this.state.views)}.
             </h5>
             <h6 style={styles.time}>{format(post.created_time, 'dddd, MMMM Do, YYYY [at] hh:mma')}</h6>
           </div>
@@ -84,4 +97,4 @@ Post.propTypes = {
   post: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
-export default Post;
+export default Radium(Post);

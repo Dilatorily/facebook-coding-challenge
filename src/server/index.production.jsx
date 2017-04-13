@@ -4,6 +4,7 @@ import express from 'express'; // eslint-disable-line import/no-extraneous-depen
 import compression from 'compression'; // eslint-disable-line import/no-extraneous-dependencies
 import helmet from 'helmet'; // eslint-disable-line import/no-extraneous-dependencies
 import spdy from 'spdy'; // eslint-disable-line import/no-extraneous-dependencies
+import bodyParser from 'body-parser'; // eslint-disable-line import/no-extraneous-dependencies
 
 import facebook from './facebook';
 import { httpsMaxAge, cacheMaxAge, port, httpsPort, pems } from '../../configuration';
@@ -33,6 +34,7 @@ secureApp.use(helmet.hsts({
   includeSubdomains: true,
   force: true,
 }));
+secureApp.use(bodyParser.json());
 
 facebook(secureApp);
 secureApp.use(express.static('public', { maxAge: cacheMaxAge }));

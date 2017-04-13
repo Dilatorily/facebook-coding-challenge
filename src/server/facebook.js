@@ -28,7 +28,16 @@ const facebook = (app) => {
         if (error) {
           response.sendStatus(403);
         } else {
-          response.redirect(`/login?access_token=${authResponse.access_token}`);
+          fbgraph.get(configuration.fbgraph.appId, {
+            access_token: authResponse.access_token,
+            fields: 'access_token',
+          }, (tokenError, tokenResponse) => {
+            if (tokenError) {
+              response.sendStatus(403);
+            } else {
+              response.redirect(`/login?access_token=${tokenResponse.access_token}`);
+            }
+          });
         }
       });
     }
@@ -38,11 +47,26 @@ const facebook = (app) => {
     fbgraph.get(`${configuration.fbgraph.appId}/promotable_posts`, {
       access_token: request.get('Access-Token'),
       fields: 'message,is_published,created_time',
+      limit: 100,
     }, (error, posts) => {
       if (error) {
         response.sendStatus(500);
       } else {
         response.send(posts.data);
+      }
+    });
+  });
+
+  app.post('/api/posts', (request, response) => {
+    fbgraph.post(`${configuration.fbgraph.appId}/feed`, {
+      access_token: request.get('Access-Token'),
+      message: request.body.post,
+      published: request.body.isPublished,
+    }, (error, post) => {
+      if (error) {
+        response.sendStatus(500);
+      } else {
+        response.send(201, post);
       }
     });
   });
