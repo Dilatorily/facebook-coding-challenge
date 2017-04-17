@@ -16,7 +16,7 @@ const facebook = (app) => {
       if (!request.query.error) {
         response.redirect(oauthUrl);
       } else {
-        response.sendStatus(403);
+        response.status(403).send(request.query.error);
       }
     } else {
       fbgraph.authorize({
@@ -26,14 +26,14 @@ const facebook = (app) => {
         redirect_uri: configuration.fbgraph.redirectUri,
       }, (error, authResponse) => {
         if (error) {
-          response.sendStatus(403);
+          response.status(403).send(error);
         } else {
           fbgraph.get(configuration.fbgraph.appId, {
             access_token: authResponse.access_token,
             fields: 'access_token',
           }, (tokenError, tokenResponse) => {
             if (tokenError) {
-              response.sendStatus(403);
+              response.status(403).send(tokenError);
             } else {
               response.redirect(`/login?access_token=${tokenResponse.access_token}`);
             }
@@ -47,12 +47,11 @@ const facebook = (app) => {
     fbgraph.get(`${configuration.fbgraph.appId}/promotable_posts`, {
       access_token: request.get('Access-Token'),
       fields: 'message,is_published,created_time',
-      limit: 100,
     }, (error, posts) => {
       if (error) {
-        response.sendStatus(500);
+        response.status(500).send(error);
       } else {
-        response.send(posts.data);
+        response.send(posts);
       }
     });
   });
@@ -64,7 +63,7 @@ const facebook = (app) => {
       published: request.body.isPublished,
     }, (error, post) => {
       if (error) {
-        response.sendStatus(500);
+        response.status(500).send(error);
       } else {
         response.send(201, post);
       }
@@ -77,7 +76,7 @@ const facebook = (app) => {
       fields: 'values',
     }, (error, views) => {
       if (error) {
-        response.sendStatus(500);
+        response.status(500).send(error);
       } else {
         response.send(views.data);
       }
@@ -90,7 +89,7 @@ const facebook = (app) => {
       height: 100,
     }, (error, picture) => {
       if (error) {
-        response.sendStatus(500);
+        response.status(500).send(error);
       } else {
         response.send(picture);
       }
