@@ -8,7 +8,6 @@ Dilatorily Administration Application
 
 ## Commands
 * `yarn`: Installs the *NPM* dependencies.
-* `yarn clean`: Removes the `build` and the `public` directory.
 * `yarn build`: Bundles all of the server application in the `build` directory and all of the client application in the `public` directory.
 * `yarn dev`: Starts a development server with hot reloading serving the application *in-memory* at [http://0.0.0.0:3000](http://0.0.0.0:3000).
 * `yarn start`: Starts a server serving the `public` directory at [https://0.0.0.0](https://0.0.0.0).
