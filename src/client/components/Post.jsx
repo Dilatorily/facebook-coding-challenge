@@ -3,7 +3,7 @@ import Radium from 'radium';
 import PropTypes from 'prop-types';
 import format from 'date-fns/format';
 
-import { get, pluralize } from '../utils';
+import { pluralize } from '../utils';
 
 const styles = {
   container: {
@@ -55,42 +55,30 @@ const styles = {
   },
 };
 
-class Post extends React.Component {
-  state = { views: 0 }
-
-  componentWillMount() {
-    get(`/api/posts/${this.props.post.id}/views`).then((views) => {
-      this.setState({ views: views[0].values[0].value });
-    });
-  }
-
-  render() {
-    const { picture, post } = this.props;
-
-    const content = { __html: post.message.replace(/\n/g, '<br />') };
-    const ids = post.id.split('_');
-    return (
-      <li style={styles.container}>
-        <div style={styles.header}>
-          <a style={styles.pictureLink} href="https://www.facebook.com/Dilatorily-515870255467883">
-            <img style={styles.picture} src={picture} alt="Dilatorily Profile" />
-          </a>
-          <div>
-            <h5 style={styles.post}>
-              <a style={styles.published} href={`https://www.facebook.com/permalink.php?story_fbid=${ids[1]}&id=${ids[0]}`}>
-                {post.is_published ? 'Published' : 'Unpublished'} Post
-              </a> viewed by {this.state.views} {pluralize('person', this.state.views)}.
-            </h5>
-            <h6 style={styles.time}>{format(post.created_time, 'dddd, MMMM Do, YYYY [at] hh:mma')}</h6>
-          </div>
+const Post = ({ picture, post }) => {
+  const content = { __html: post.message.replace(/\n/g, '<br />') };
+  const ids = post.id.split('_');
+  return (
+    <li style={styles.container}>
+      <div style={styles.header}>
+        <a style={styles.pictureLink} href="https://www.facebook.com/Dilatorily-515870255467883">
+          <img style={styles.picture} src={picture} alt="Dilatorily Profile" />
+        </a>
+        <div>
+          <h5 style={styles.post}>
+            <a style={styles.published} href={`https://www.facebook.com/permalink.php?story_fbid=${ids[1]}&id=${ids[0]}`}>
+              {post.is_published ? 'Published' : 'Unpublished'} Post
+            </a> viewed by {post.insights.data[0].values[0].value} {pluralize('person', post.insights.data[0].values[0].value)}.
+          </h5>
+          <h6 style={styles.time}>{format(post.created_time, 'dddd, MMMM Do, YYYY [at] hh:mma')}</h6>
         </div>
-        {/* eslint-disable react/no-danger */}
-        <div style={styles.content} dangerouslySetInnerHTML={content} />
-        {/* eslint-enable react/no-danger */}
-      </li>
-    );
-  }
-}
+      </div>
+      {/* eslint-disable react/no-danger */}
+      <div style={styles.content} dangerouslySetInnerHTML={content} />
+      {/* eslint-enable react/no-danger */}
+    </li>
+  );
+};
 
 Post.propTypes = {
   picture: PropTypes.string.isRequired,

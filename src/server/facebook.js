@@ -1,6 +1,15 @@
+import url from 'url';
 import fbgraph from 'fbgraph'; // eslint-disable-line import/no-extraneous-dependencies
 
 import configuration from '../../configuration';
+
+const proxyPostsPaging = posts => ({
+  ...posts,
+  paging: posts.paging ? {
+    ...posts.paging,
+    next: posts.paging.next ? `/api/posts/next${url.parse(posts.paging.next).search}` : undefined,
+  } : undefined,
+});
 
 const facebook = (app) => {
   fbgraph.setVersion('2.8');
@@ -46,12 +55,12 @@ const facebook = (app) => {
   app.get('/api/posts', (request, response) => {
     fbgraph.get(`${configuration.fbgraph.appId}/promotable_posts`, {
       access_token: request.get('Access-Token'),
-      fields: 'message,is_published,created_time',
+      fields: 'message,is_published,created_time,insights.metric(post_impressions_unique){values}',
     }, (error, posts) => {
       if (error) {
         response.status(500).send(error);
       } else {
-        response.send(posts);
+        response.send(proxyPostsPaging(posts));
       }
     });
   });
@@ -70,15 +79,12 @@ const facebook = (app) => {
     });
   });
 
-  app.get('/api/posts/:id/views', (request, response) => {
-    fbgraph.get(`${request.params.id}/insights/post_impressions_unique`, {
-      access_token: request.get('Access-Token'),
-      fields: 'values',
-    }, (error, views) => {
+  app.get('/api/posts/next', (request, response) => {
+    fbgraph.get(`${configuration.fbgraph.appId}/promotable_posts${url.parse(request.originalUrl).search}`, (error, posts) => {
       if (error) {
         response.status(500).send(error);
       } else {
-        response.send(views.data);
+        response.send(proxyPostsPaging(posts));
       }
     });
   });
