@@ -14,7 +14,7 @@ const proxyPostsPaging = posts => ({
 const facebook = (app) => {
   fbgraph.setVersion('2.8');
 
-  app.get('/oauth', (request, response) => {
+  app.get('/api/oauth', (request, response) => {
     if (!request.query.code) {
       const oauthUrl = fbgraph.getOauthUrl({
         client_id: configuration.fbgraph.clientId,
@@ -52,6 +52,23 @@ const facebook = (app) => {
     }
   });
 
+  app.get('/api/id', (request, response) => {
+    response.send({ id: configuration.fbgraph.appId });
+  });
+
+  app.get('/api/picture', (request, response) => {
+    fbgraph.get(`${configuration.fbgraph.appId}/picture`, {
+      access_token: request.get('Access-Token'),
+      height: 100,
+    }, (error, picture) => {
+      if (error) {
+        response.status(500).send(error);
+      } else {
+        response.send(picture);
+      }
+    });
+  });
+
   app.get('/api/posts', (request, response) => {
     fbgraph.get(`${configuration.fbgraph.appId}/promotable_posts`, {
       access_token: request.get('Access-Token'),
@@ -74,7 +91,7 @@ const facebook = (app) => {
       if (error) {
         response.status(500).send(error);
       } else {
-        response.send(201, post);
+        response.status(201).send(post);
       }
     });
   });
@@ -85,19 +102,6 @@ const facebook = (app) => {
         response.status(500).send(error);
       } else {
         response.send(proxyPostsPaging(posts));
-      }
-    });
-  });
-
-  app.get('/api/picture', (request, response) => {
-    fbgraph.get(`${configuration.fbgraph.appId}/picture`, {
-      access_token: request.get('Access-Token'),
-      height: 100,
-    }, (error, picture) => {
-      if (error) {
-        response.status(500).send(error);
-      } else {
-        response.send(picture);
       }
     });
   });

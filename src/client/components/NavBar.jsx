@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Radium from 'radium';
 
 import icon from '../assets/icon.png';
@@ -30,14 +31,18 @@ const styles = {
   },
 };
 
-const NavBar = () => (
+const NavBar = ({ appId }) => (
   <div style={styles.background}>
     <div style={styles.container}>
-      <a href="https://www.facebook.com/Dilatorily-515870255467883">
+      <a href={`https://www.facebook.com/${appId}`}>
         <span style={styles.icon} />
       </a>
     </div>
   </div>
 );
+
+NavBar.propTypes = {
+  appId: PropTypes.string.isRequired,
+};
 
 export default Radium(NavBar);

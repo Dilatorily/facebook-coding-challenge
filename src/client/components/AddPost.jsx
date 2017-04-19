@@ -76,7 +76,7 @@ const styles = {
   },
 };
 
-class AddPost extends React.Component {
+class AddPost extends React.PureComponent {
   state = { post: '' }
 
   handleSubmit = isPublished => () => {

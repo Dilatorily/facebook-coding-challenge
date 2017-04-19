@@ -1,6 +1,6 @@
 import React from 'react';
-import Radium from 'radium';
 import PropTypes from 'prop-types';
+import Radium from 'radium';
 import format from 'date-fns/format';
 
 import { pluralize } from '../utils';
@@ -55,14 +55,14 @@ const styles = {
   },
 };
 
-const Post = ({ picture, post }) => {
+const Post = ({ appId, picture, post }) => {
   const content = { __html: post.message.replace(/\n/g, '<br />') };
   const ids = post.id.split('_');
   return (
     <li style={styles.container}>
       <div style={styles.header}>
-        <a style={styles.pictureLink} href="https://www.facebook.com/Dilatorily-515870255467883">
-          <img style={styles.picture} src={picture} alt="Dilatorily Profile" />
+        <a style={styles.pictureLink} href={`https://www.facebook.com/${appId}`}>
+          <img style={styles.picture} src={picture} alt="Page Profile" />
         </a>
         <div>
           <h5 style={styles.post}>
@@ -81,8 +81,21 @@ const Post = ({ picture, post }) => {
 };
 
 Post.propTypes = {
+  appId: PropTypes.string.isRequired,
   picture: PropTypes.string.isRequired,
-  post: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  post: PropTypes.shape({
+    created_time: PropTypes.string,
+    id: PropTypes.string,
+    insights: PropTypes.shape({
+      data: PropTypes.arrayOf(PropTypes.shape({
+        values: PropTypes.arrayOf(PropTypes.shape({
+          value: PropTypes.number,
+        })),
+      })),
+    }),
+    is_published: PropTypes.bool,
+    message: PropTypes.string,
+  }).isRequired,
 };
 
 export default Radium(Post);

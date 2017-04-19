@@ -1,5 +1,5 @@
 const OauthRedirect = () => {
-  window.location = '/oauth';
+  window.location = '/api/oauth';
   return null;
 };
 

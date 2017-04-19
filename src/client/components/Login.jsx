@@ -4,7 +4,7 @@ import { Redirect } from 'react-router-dom';
 
 import OauthRedirect from './OauthRedirect';
 
-class Login extends React.Component {
+class Login extends React.PureComponent {
   componentWillMount() {
     const query = new URLSearchParams(this.props.location.search);
     const accessToken = query.get('access_token');

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import AddPost from './AddPost';
 import Post from './Post';
@@ -28,40 +29,53 @@ const styles = {
   },
 };
 
-class Posts extends React.Component {
+class Posts extends React.PureComponent {
   state = {
     posts: [],
     picture: '',
     loadMore: '',
   }
 
-  componentWillMount() {
-    Promise.all([
+  async componentWillMount() {
+    const [posts, picture] = await Promise.all([
       get('/api/posts'),
       get('/api/picture'),
-    ]).then(([posts, picture]) => {
-      this.setState({
-        posts: posts.data,
-        picture: picture.location,
-        loadMore: posts.data.length > 0 ? posts.paging.next : '',
-      });
+    ]);
+    this.setState({
+      posts: posts.data,
+      picture: picture.location,
+      loadMore: posts.data.length > 0 ? posts.paging.next : '',
     });
   }
 
   handleClick = () => {
-    get(this.state.loadMore).then((posts) => {
-      this.setState({
-        ...this.state,
-        posts: [...this.state.posts, ...posts.data],
+    // FIXME: Workaround to keep a reference to `this` because of a Babel and RHL issue
+    // https://github.com/gaearon/react-hot-loader/issues/391
+    // https://github.com/babel/babel/issues/5078
+    const self = this;
+    (async () => {
+      const posts = await get(self.state.loadMore);
+      self.setState({
+        ...self.state,
+        posts: [...self.state.posts, ...posts.data],
         loadMore: posts.data.length > 0 ? posts.paging.next : '',
       });
-    });
+    })();
   };
 
   handleSubmit = () => {
-    get('/api/posts').then((posts) => {
-      this.setState({ ...this.state, posts });
-    });
+    // FIXME: Workaround to keep a reference to `this` because of a Babel and RHL issue
+    // https://github.com/gaearon/react-hot-loader/issues/391
+    // https://github.com/babel/babel/issues/5078
+    const self = this;
+    (async () => {
+      const posts = await get('/api/posts');
+      self.setState({
+        ...self.state,
+        posts: posts.data,
+        loadMore: posts.data.length > 0 ? posts.paging.next : '',
+      });
+    })();
   }
 
   render() {
@@ -77,7 +91,12 @@ class Posts extends React.Component {
                 if (b.created_time > a.created_time) return 1;
                 return 0;
               })
-              .map(post => <Post key={post.id} post={post} picture={this.state.picture} />)
+              .map(post => <Post
+                key={post.id}
+                appId={this.props.appId}
+                post={post}
+                picture={this.state.picture}
+              />)
           }
         </ul>
         {
@@ -89,5 +108,9 @@ class Posts extends React.Component {
     );
   }
 }
+
+Posts.propTypes = {
+  appId: PropTypes.string.isRequired,
+};
 
 export default Posts;

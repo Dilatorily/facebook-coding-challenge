@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Radium from 'radium';
 
 import OauthRedirect from './OauthRedirect';
@@ -14,16 +15,20 @@ const styles = {
   },
 };
 
-const LoggedIn = () => {
+const LoggedIn = ({ appId }) => {
   if (!localStorage.getItem('access_token')) {
     return <OauthRedirect />;
   }
 
   return (
     <div style={styles.container}>
-      <Posts />
+      <Posts appId={appId} />
     </div>
   );
+};
+
+LoggedIn.propTypes = {
+  appId: PropTypes.string.isRequired,
 };
 
 export default Radium(LoggedIn);
