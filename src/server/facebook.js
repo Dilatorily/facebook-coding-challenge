@@ -1,5 +1,5 @@
 import url from 'url';
-import fbgraph from 'fbgraph'; // eslint-disable-line import/no-extraneous-dependencies
+import rp from 'request-promise-native'; // eslint-disable-line import/no-extraneous-dependencies
 
 import configuration from '../../configuration';
 
@@ -12,98 +12,114 @@ const proxyPostsPaging = posts => ({
 });
 
 const facebook = (app) => {
-  fbgraph.setVersion('2.8');
-
-  app.get('/api/oauth', (request, response) => {
+  app.get('/api/oauth', async (request, response) => {
     if (!request.query.code) {
-      const oauthUrl = fbgraph.getOauthUrl({
-        client_id: configuration.fbgraph.clientId,
-        redirect_uri: configuration.fbgraph.redirectUri,
-        scope: configuration.fbgraph.scope,
-      });
-
       if (!request.query.error) {
-        response.redirect(oauthUrl);
+        response.redirect(`https://www.facebook.com/v${configuration.facebook.version}/dialog/oauth?client_id=${configuration.facebook.clientId}&redirect_uri=${configuration.facebook.redirectUri}&scope=${configuration.facebook.scope}`);
       } else {
         response.status(403).send(request.query.error);
       }
     } else {
-      fbgraph.authorize({
-        client_id: configuration.fbgraph.clientId,
-        client_secret: configuration.fbgraph.clientSecret,
-        code: request.query.code,
-        redirect_uri: configuration.fbgraph.redirectUri,
-      }, (error, authResponse) => {
-        if (error) {
-          response.status(403).send(error);
-        } else {
-          fbgraph.get(configuration.fbgraph.appId, {
-            access_token: authResponse.access_token,
+      try {
+        const { access_token: token } = await rp({
+          uri: `https://graph.facebook.com/v${configuration.facebook.version}/oauth/access_token`,
+          qs: {
+            client_id: configuration.facebook.clientId,
+            client_secret: configuration.facebook.clientSecret,
+            code: request.query.code,
+            redirect_uri: configuration.facebook.redirectUri,
+          },
+          json: true,
+        });
+        const { access_token: accessToken } = await rp({
+          uri: `https://graph.facebook.com/v${configuration.facebook.version}/${configuration.facebook.appId}`,
+          qs: {
+            access_token: token,
             fields: 'access_token',
-          }, (tokenError, tokenResponse) => {
-            if (tokenError) {
-              response.status(403).send(tokenError);
-            } else {
-              response.redirect(`/login?access_token=${tokenResponse.access_token}`);
-            }
-          });
-        }
-      });
+          },
+          json: true,
+        });
+        response.redirect(`/login?access_token=${accessToken}`);
+      } catch (error) {
+        response.status(403).send(error);
+      }
     }
   });
 
   app.get('/api/id', (request, response) => {
-    response.send({ id: configuration.fbgraph.appId });
+    response.send({ id: configuration.facebook.appId });
   });
 
-  app.get('/api/picture', (request, response) => {
-    fbgraph.get(`${configuration.fbgraph.appId}/picture`, {
-      access_token: request.get('Access-Token'),
-      height: 100,
-    }, (error, picture) => {
-      if (error) {
-        response.status(500).send(error);
-      } else {
-        response.send(picture);
-      }
-    });
+  app.get('/api/picture', async (request, response) => {
+    try {
+      const picture = await rp({
+        uri: `https://graph.facebook.com/v${configuration.facebook.version}/${configuration.facebook.appId}/picture`,
+        simple: false,
+        followRedirect: false,
+        qs: {
+          access_token: request.get('Access-Token'),
+          height: 100,
+        },
+        transform: (body, { headers, statusCode }) => {
+          if (statusCode >= 400) {
+            throw new Error(body);
+          }
+
+          return {
+            location: headers['content-type'].includes('image') ? headers.location : undefined,
+          };
+        },
+      });
+      response.send(picture);
+    } catch (error) {
+      response.status(500).send(error);
+    }
   });
 
-  app.get('/api/posts', (request, response) => {
-    fbgraph.get(`${configuration.fbgraph.appId}/promotable_posts`, {
-      access_token: request.get('Access-Token'),
-      fields: 'message,is_published,created_time,insights.metric(post_impressions_unique){values}',
-    }, (error, posts) => {
-      if (error) {
-        response.status(500).send(error);
-      } else {
-        response.send(proxyPostsPaging(posts));
-      }
-    });
+  app.get('/api/posts', async (request, response) => {
+    try {
+      const posts = await rp({
+        uri: `https://graph.facebook.com/v${configuration.facebook.version}/${configuration.facebook.appId}/promotable_posts`,
+        qs: {
+          access_token: request.get('Access-Token'),
+          fields: 'message,is_published,created_time,insights.metric(post_impressions_unique){values}',
+        },
+        json: true,
+      });
+      response.send(proxyPostsPaging(posts));
+    } catch (error) {
+      response.status(500).send(error);
+    }
   });
 
-  app.post('/api/posts', (request, response) => {
-    fbgraph.post(`${configuration.fbgraph.appId}/feed`, {
-      access_token: request.get('Access-Token'),
-      message: request.body.post,
-      published: request.body.isPublished,
-    }, (error, post) => {
-      if (error) {
-        response.status(500).send(error);
-      } else {
-        response.status(201).send(post);
-      }
-    });
+  app.post('/api/posts', async (request, response) => {
+    try {
+      const post = await rp({
+        uri: `https://graph.facebook.com/v${configuration.facebook.version}/${configuration.facebook.appId}/feed`,
+        method: 'POST',
+        json: true,
+        body: {
+          access_token: request.get('Access-Token'),
+          message: request.body.post,
+          published: request.body.isPublished,
+        },
+      });
+      response.status(201).send(post);
+    } catch (error) {
+      response.status(500).send(error);
+    }
   });
 
-  app.get('/api/posts/next', (request, response) => {
-    fbgraph.get(`${configuration.fbgraph.appId}/promotable_posts${url.parse(request.originalUrl).search}`, (error, posts) => {
-      if (error) {
-        response.status(500).send(error);
-      } else {
-        response.send(proxyPostsPaging(posts));
-      }
-    });
+  app.get('/api/posts/next', async (request, response) => {
+    try {
+      const posts = await rp({
+        uri: `https://graph.facebook.com/v${configuration.facebook.version}/${configuration.facebook.appId}/promotable_posts${url.parse(request.originalUrl).search}`,
+        json: true,
+      });
+      response.send(proxyPostsPaging(posts));
+    } catch (error) {
+      response.status(500).send(error);
+    }
   });
 };
 
