@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "rimraf build public",
     "build": "NODE_ENV=production webpack -p",
-    "test": "jest --coverage --collectCoverageFrom=src/**/*.{js,jsx} --coverageDirectory=coverage",
+    "test": "jest --config=jest.json",
     "dev": "run-p -nr dev:client dev:server",
     "dev:client": "PORT=3001 NODE_ENV=development webpack-dev-server --config webpack.config.client.js",
     "predev:server": "NODE_ENV=development webpack --config webpack.config.server.js",
