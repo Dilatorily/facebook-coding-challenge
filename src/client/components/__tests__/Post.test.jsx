@@ -147,4 +147,24 @@ describe('<Post />', () => {
       /* eslint-enable react/no-danger */
     )).toBe(true);
   });
+
+  it('should replace all newlines to a <br /> element', () => {
+    const post = {
+      appId: 'testApplicationId',
+      picture: 'http://picture.url',
+      post: {
+        created_time: '2017-01-01T00:00:00+0000',
+        id: 'testApplicationId_testPostId1',
+        insights: { data: [{ values: [{ value: 10 }] }] },
+        is_published: true,
+        message: 'This is a test message.\nHello, World!',
+      },
+    };
+    const wrapper = shallow(<Post {...post} />);
+    expect(wrapper.containsMatchingElement(
+      /* eslint-disable react/no-danger */
+      <div dangerouslySetInnerHTML={{ __html: 'This is a test message.<br />Hello, World!' }} />,
+      /* eslint-enable react/no-danger */
+    )).toBe(true);
+  });
 });
