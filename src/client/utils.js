@@ -17,8 +17,11 @@ export const post = async (url, json = {}) => {
   return response.json();
 };
 
-export const pluralize = (word, count) => {
-  const exceptions = {};
+export const pluralize = (word, count = 1) => {
+  const exceptions = {
+    datum: 'data',
+  };
+
   if (count === 1) {
     return word;
   }
