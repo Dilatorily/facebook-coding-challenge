@@ -48,40 +48,28 @@ class Posts extends React.PureComponent {
     });
   }
 
-  handleClick = () => {
-    // FIXME: Workaround to keep a reference to `this` because of a Babel and RHL issue
-    // https://github.com/gaearon/react-hot-loader/issues/391
-    // https://github.com/babel/babel/issues/5078
-    const self = this;
-    (async () => {
-      const posts = await get(self.state.loadMore);
-      self.setState({
-        ...self.state,
-        posts: [...self.state.posts, ...posts.data],
-        loadMore: posts.data.length > 0 ? posts.paging.next : '',
-      });
-    })();
+  handleClick = () => async () => {
+    const posts = await get(this.state.loadMore);
+    this.setState({
+      ...this.state,
+      posts: [...this.state.posts, ...posts.data],
+      loadMore: posts.data.length > 0 ? posts.paging.next : '',
+    });
   };
 
-  handleSubmit = () => {
-    // FIXME: Workaround to keep a reference to `this` because of a Babel and RHL issue
-    // https://github.com/gaearon/react-hot-loader/issues/391
-    // https://github.com/babel/babel/issues/5078
-    const self = this;
-    (async () => {
-      const posts = await get('/api/posts');
-      self.setState({
-        ...self.state,
-        posts: posts.data,
-        loadMore: posts.data.length > 0 ? posts.paging.next : '',
-      });
-    })();
+  handleSubmit = () => async () => {
+    const posts = await get('/api/posts');
+    this.setState({
+      ...this.state,
+      posts: posts.data,
+      loadMore: posts.data.length > 0 ? posts.paging.next : '',
+    });
   }
 
   render() {
     return (
       <div>
-        <AddPost onSubmit={this.handleSubmit} />
+        <AddPost onSubmit={this.handleSubmit()} />
         <ul style={styles.list}>
           {
             this.state.posts
@@ -100,7 +88,7 @@ class Posts extends React.PureComponent {
           }
         </ul>
         {
-          this.state.loadMore && <button style={styles.button} onClick={this.handleClick}>
+          this.state.loadMore && <button style={styles.button} onClick={this.handleClick()}>
             More Stories
           </button>
         }

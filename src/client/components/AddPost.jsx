@@ -79,12 +79,11 @@ const styles = {
 class AddPost extends React.PureComponent {
   state = { post: '' }
 
-  handleSubmit = isPublished => () => {
+  handleSubmit = isPublished => async () => {
     if (this.state.post.trim()) {
-      post('/api/posts', { post: this.state.post.trim(), isPublished }).then(() => {
-        this.setState({ post: '' });
-        this.props.onSubmit();
-      });
+      await post('/api/posts', { post: this.state.post.trim(), isPublished });
+      this.setState({ post: '' });
+      this.props.onSubmit();
     }
   }
 
