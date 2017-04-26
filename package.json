@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",
-    "date-fns": "^1.28.3",
+    "date-fns": "^1.28.4",
     "normalize.css": "^6.0.0",
     "prop-types": "^15.5.8",
     "radium": "^0.18.2",
