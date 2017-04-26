@@ -9,6 +9,10 @@ describe('<NavBar />', () => {
     Radium.TestMode.enable();
   });
 
+  afterAll(() => {
+    Radium.TestMode.disable();
+  });
+
   it('should render the Facebook icon', () => {
     const wrapper = shallow(<NavBar appId="testApplicationId" />);
     expect(wrapper.containsMatchingElement(

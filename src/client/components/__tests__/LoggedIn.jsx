@@ -11,6 +11,10 @@ describe('<LoggedIn />', () => {
     Radium.TestMode.enable();
   });
 
+  afterAll(() => {
+    Radium.TestMode.disable();
+  });
+
   it('should render a OauthRedirect if the access token is not in the localStorage', () => {
     window.localStorage = {
       getItem: jest.fn().mockReturnValue(),

@@ -24,6 +24,8 @@ class App extends React.PureComponent {
     this.setState({ id });
   }
 
+  renderLoggedIn = () => <LoggedIn appId={this.state.id} />
+
   render() {
     return (
       <div style={styles.container}>
@@ -31,7 +33,7 @@ class App extends React.PureComponent {
         <div style={styles.content}>
           <Switch>
             <Route path="/login" component={Login} />
-            <Route exact path="/" render={() => <LoggedIn appId={this.state.id} />} />
+            <Route exact path="/" render={this.renderLoggedIn} />
             <Route component={OauthRedirect} />
           </Switch>
         </div>
