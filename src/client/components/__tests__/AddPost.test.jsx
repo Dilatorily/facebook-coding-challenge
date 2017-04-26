@@ -57,7 +57,7 @@ describe('<AddPost />', () => {
   it('should clear the state on submit', async () => {
     const wrapper = shallow(<AddPost />);
     wrapper.setState({ post: 'test post' });
-    await wrapper.instance().handleSubmit(true)();
+    await wrapper.instance().handleSubmit()();
     expect(wrapper.state().post).toBe('');
   });
 
@@ -65,7 +65,7 @@ describe('<AddPost />', () => {
     const onSubmit = jest.fn();
     const wrapper = shallow(<AddPost onSubmit={onSubmit} />);
     wrapper.setState({ post: 'test post' });
-    await wrapper.instance().handleSubmit(true)();
+    await wrapper.instance().handleSubmit()();
     expect(onSubmit.mock.calls.length).toBe(1);
     expect(onSubmit.mock.calls[0]).toEqual([]);
   });

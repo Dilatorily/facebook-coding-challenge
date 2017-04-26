@@ -51,7 +51,6 @@ class Posts extends React.PureComponent {
   handleClick = () => async () => {
     const posts = await get(this.state.loadMore);
     this.setState({
-      ...this.state,
       posts: [...this.state.posts, ...posts.data],
       loadMore: posts.data.length > 0 ? posts.paging.next : '',
     });
@@ -60,7 +59,6 @@ class Posts extends React.PureComponent {
   handleSubmit = () => async () => {
     const posts = await get('/api/posts');
     this.setState({
-      ...this.state,
       posts: posts.data,
       loadMore: posts.data.length > 0 ? posts.paging.next : '',
     });
