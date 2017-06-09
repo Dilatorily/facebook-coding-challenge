@@ -1,6 +1,7 @@
 import React from 'react';
 import Radium from 'radium';
 import PropTypes from 'prop-types';
+import DatePicker from 'material-ui/DatePicker';
 
 import { post } from '../utils';
 
@@ -79,9 +80,13 @@ const styles = {
 class AddPost extends React.PureComponent {
   state = { post: '' }
 
-  handleSubmit = isPublished => async () => {
+  handleSubmit = (isPublished, date) => async () => {
     if (this.state.post.trim()) {
-      await post('/api/posts', { post: this.state.post.trim(), isPublished });
+      await post('/api/posts', {
+        post: this.state.post.trim(),
+        isPublished,
+        publishingTime: date ? date.getTime() : undefined,
+      });
       this.setState({ post: '' });
       this.props.onSubmit();
     }
@@ -103,6 +108,17 @@ class AddPost extends React.PureComponent {
           />
         </div>
         <div style={styles.controls}>
+          <DatePicker
+            id="date"
+            onChange={(event, date) => this.setState({ date })}
+          />
+          <button
+            key="later"
+            style={[styles.button, styles.unpublish]}
+            onClick={this.handleSubmit(false, this.state.date)}
+          >
+            Publish Later
+          </button>
           <button
             key="unpublish"
             style={[styles.button, styles.unpublish]}

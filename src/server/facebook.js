@@ -94,6 +94,7 @@ const facebook = (app) => {
 
   app.post('/api/posts', async (request, response) => {
     try {
+      console.log(request.body);
       const post = await rp({
         uri: `https://graph.facebook.com/v${configuration.facebook.version}/${configuration.facebook.appId}/feed`,
         method: 'POST',
@@ -102,6 +103,8 @@ const facebook = (app) => {
           access_token: request.get('Access-Token'),
           message: request.body.post,
           published: request.body.isPublished,
+          scheduled_publish_time:
+            request.body.isPublished ? undefined : (request.body.publisingTime || undefined),
         },
       });
       response.status(201).send(post);
